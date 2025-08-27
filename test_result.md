@@ -192,9 +192,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Time-based playlist API endpoints"
-    - "MongoDB schema and sample data"
     - "Circular time-dial UI interface"
+    - "Real-time clock and time block detection"
+    - "Automatic playlist switching"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
