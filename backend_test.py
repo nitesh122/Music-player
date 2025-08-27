@@ -10,8 +10,8 @@ import os
 from datetime import datetime
 import time
 
-# Get base URL from environment
-BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'https://salil-music.preview.emergentagent.com')
+# Get base URL from environment - use localhost for testing since external URL has routing issues
+BASE_URL = "http://localhost:3000"
 API_BASE = f"{BASE_URL}/api"
 
 class SalilMusicAPITester:
