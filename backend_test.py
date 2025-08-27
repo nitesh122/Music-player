@@ -42,7 +42,7 @@ class SalilMusicAPITester:
     def test_root_endpoint(self):
         """Test GET /api/ - Root API endpoint"""
         try:
-            response = requests.get(f"{self.base_url}/", timeout=10)
+            response = requests.get(f"{self.base_url}", timeout=10)
             
             if response.status_code == 200:
                 data = response.json()
