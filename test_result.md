@@ -146,7 +146,7 @@ frontend:
     status_history:
       - working: "testing_needed"
         agent: "main"
-        comment: "Built circular SVG time-dial with 6 segments matching the mockup design, includes play button in center"
+        comment: "Built circular SVG time-dial with 6 segments matching the mockup design, includes play button in center. Ready for UI testing to verify visual appearance and interactions."
 
   - task: "Real-time clock and time block detection"
     implemented: true
@@ -158,7 +158,7 @@ frontend:
     status_history:
       - working: "testing_needed"
         agent: "main"
-        comment: "Implemented live clock updates every second and automatic time block detection logic for 6 time periods"
+        comment: "Implemented live clock updates every second and automatic time block detection logic for 6 time periods. Need to verify clock updates in real-time and correct time block highlighting."
 
   - task: "Automatic playlist switching"
     implemented: true
@@ -170,7 +170,7 @@ frontend:
     status_history:
       - working: "testing_needed"
         agent: "main"
-        comment: "Auto-switches playlists when time changes to new block, includes manual playlist selection feature"
+        comment: "Auto-switches playlists when time changes to new block, includes manual playlist selection feature. Need to test manual time block selection and playlist switching behavior."
 
   - task: "Audio player controls"
     implemented: true
@@ -182,7 +182,7 @@ frontend:
     status_history:
       - working: "testing_needed"
         agent: "main"
-        comment: "Basic audio controls with play/pause, next/previous, volume slider. No actual audio playback yet (demo mode)"
+        comment: "Basic audio controls with play/pause, next/previous, volume slider. No actual audio playback yet (demo mode). Need to test all control interactions and UI feedback."
 
 metadata:
   created_by: "main_agent"
