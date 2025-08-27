@@ -225,6 +225,19 @@ async function handleRoute(request, { params }) {
       }))
     }
 
+    // Get songs by playlist (must come before general playlist route)
+    if (route.startsWith('/playlist/') && route.endsWith('/songs') && method === 'GET') {
+      const playlistId = route.split('/')[2]
+      
+      const songs = await db.collection('songs')
+        .find({ playlist_id: playlistId })
+        .toArray()
+
+      const cleanedSongs = songs.map(({ _id, ...rest }) => rest)
+      
+      return handleCORS(NextResponse.json(cleanedSongs))
+    }
+
     // Get specific playlist by ID
     if (route.startsWith('/playlist/') && method === 'GET') {
       const playlistId = route.split('/')[2]
@@ -266,19 +279,6 @@ async function handleRoute(request, { params }) {
     if (route === '/songs' && method === 'GET') {
       const songs = await db.collection('songs')
         .find({})
-        .toArray()
-
-      const cleanedSongs = songs.map(({ _id, ...rest }) => rest)
-      
-      return handleCORS(NextResponse.json(cleanedSongs))
-    }
-
-    // Get songs by playlist
-    if (route.startsWith('/playlist/') && route.endsWith('/songs') && method === 'GET') {
-      const playlistId = route.split('/')[2]
-      
-      const songs = await db.collection('songs')
-        .find({ playlist_id: playlistId })
         .toArray()
 
       const cleanedSongs = songs.map(({ _id, ...rest }) => rest)
