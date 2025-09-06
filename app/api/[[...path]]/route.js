@@ -88,34 +88,34 @@ const samplePlaylists = [
 // Sample songs data
 const sampleSongs = [
   // Early Morning songs
-  { id: uuidv4(), playlist_id: null, title: 'Morning Mist', artist: 'Nature Sounds', url: '', time_block: 'early-morning' },
-  { id: uuidv4(), playlist_id: null, title: 'Gentle Sunrise', artist: 'Ambient Dreams', url: '', time_block: 'early-morning' },
-  { id: uuidv4(), playlist_id: null, title: 'Bird Song Symphony', artist: 'Forest Echoes', url: '', time_block: 'early-morning' },
+  { id: uuidv4(), playlist_id: null, title: 'Morning Mist', artist: 'Nature Sounds', url: '/music/03.mp3', time_block: 'early-morning' },
+  { id: uuidv4(), playlist_id: null, title: 'Gentle Sunrise', artist: 'Ambient Dreams', url: '/music/05.mp3', time_block: 'early-morning' },
+  { id: uuidv4(), playlist_id: null, title: 'Bird Song Symphony', artist: 'Forest Echoes', url: '/music/06.mp3', time_block: 'early-morning' },
   
   // Morning songs
-  { id: uuidv4(), playlist_id: null, title: 'Fresh Start', artist: 'Positive Vibes', url: '', time_block: 'morning' },
-  { id: uuidv4(), playlist_id: null, title: 'Morning Motivation', artist: 'Upbeat Collective', url: '', time_block: 'morning' },
-  { id: uuidv4(), playlist_id: null, title: 'New Day Rising', artist: 'Energy Boost', url: '', time_block: 'morning' },
+  { id: uuidv4(), playlist_id: null, title: 'Fresh Start', artist: 'Positive Vibes', url: '/music/03.mp3', time_block: 'morning' },
+  { id: uuidv4(), playlist_id: null, title: 'Morning Motivation', artist: 'Upbeat Collective', url: '/music/03.mp3', time_block: 'morning' },
+  { id: uuidv4(), playlist_id: null, title: 'New Day Rising', artist: 'Energy Boost', url: '/music/03.mp3', time_block: 'morning' },
   
   // Afternoon songs
-  { id: uuidv4(), playlist_id: null, title: 'Focus Mode', artist: 'Productivity Mix', url: '', time_block: 'afternoon' },
-  { id: uuidv4(), playlist_id: null, title: 'Steady Rhythm', artist: 'Work Beats', url: '', time_block: 'afternoon' },
-  { id: uuidv4(), playlist_id: null, title: 'Creative Energy', artist: 'Flow State', url: '', time_block: 'afternoon' },
+  { id: uuidv4(), playlist_id: null, title: 'Focus Mode', artist: 'Productivity Mix', url: '/music/03.mp3', time_block: 'afternoon' },
+  { id: uuidv4(), playlist_id: null, title: 'Steady Rhythm', artist: 'Work Beats', url: '/music/03.mp3', time_block: 'afternoon' },
+  { id: uuidv4(), playlist_id: null, title: 'Creative Energy', artist: 'Flow State', url: '/music/03.mp3', time_block: 'afternoon' },
   
   // Evening songs
-  { id: uuidv4(), playlist_id: null, title: 'Sunset Dreams', artist: 'Chill Collective', url: '', time_block: 'evening' },
-  { id: uuidv4(), playlist_id: null, title: 'Evening Breeze', artist: 'Relaxed Vibes', url: '', time_block: 'evening' },
-  { id: uuidv4(), playlist_id: null, title: 'Twilight Glow', artist: 'Ambient Hour', url: '', time_block: 'evening' },
+  { id: uuidv4(), playlist_id: null, title: 'Sunset Dreams', artist: 'Chill Collective', url: '/music/03.mp3', time_block: 'evening' },
+  { id: uuidv4(), playlist_id: null, title: 'Evening Breeze', artist: 'Relaxed Vibes', url: '/music/03.mp3', time_block: 'evening' },
+  { id: uuidv4(), playlist_id: null, title: 'Twilight Glow', artist: 'Ambient Hour', url: '/music/03.mp3', time_block: 'evening' },
   
   // Night songs
-  { id: uuidv4(), playlist_id: null, title: 'City Lights', artist: 'Urban Nights', url: '', time_block: 'night' },
-  { id: uuidv4(), playlist_id: null, title: 'Midnight Groove', artist: 'Night Owls', url: '', time_block: 'night' },
-  { id: uuidv4(), playlist_id: null, title: 'Starlit Sky', artist: 'Evening Jazz', url: '', time_block: 'night' },
+  { id: uuidv4(), playlist_id: null, title: 'City Lights', artist: 'Urban Nights', url: '/music/07.mp3', time_block: 'night' },
+  { id: uuidv4(), playlist_id: null, title: 'Midnight Groove', artist: 'Night Owls', url: '/music/08.mp3', time_block: 'night' },
+  { id: uuidv4(), playlist_id: null, title: 'Starlit Sky', artist: 'Evening Jazz', url: '/music/09.mp3', time_block: 'night' },
   
   // Late Night songs
-  { id: uuidv4(), playlist_id: null, title: 'Peaceful Slumber', artist: 'Sleep Sounds', url: '', time_block: 'late-night' },
-  { id: uuidv4(), playlist_id: null, title: 'Night Rain', artist: 'Calm Waters', url: '', time_block: 'late-night' },
-  { id: uuidv4(), playlist_id: null, title: 'Dream State', artist: 'Soft Melodies', url: '', time_block: 'late-night' }
+  { id: uuidv4(), playlist_id: null, title: 'Peaceful Slumber', artist: 'Sleep Sounds', url: '/music/03.mp3', time_block: 'late-night' },
+  { id: uuidv4(), playlist_id: null, title: 'Night Rain', artist: 'Calm Waters', url: '/music/03.mp3', time_block: 'late-night' },
+  { id: uuidv4(), playlist_id: null, title: 'Dream State', artist: 'Soft Melodies', url: '/music/03.mp3', time_block: 'late-night' }
 ]
 
 // Initialize database with sample data

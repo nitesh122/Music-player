@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Play, Pause, SkipForward, SkipBack, Volume2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -15,57 +15,6 @@ const timeBlocks = [
   { id: 'late-night', name: 'Late Night', time: '12-4 AM', start: 0, end: 4, color: '#191970' }
 ]
 
-const samplePlaylists = {
-  'early-morning': {
-    name: 'Dawn Serenity',
-    songs: [
-      { id: 1, title: 'Morning Mist', artist: 'Nature Sounds', url: '' },
-      { id: 2, title: 'Gentle Sunrise', artist: 'Ambient Dreams', url: '' },
-      { id: 3, title: 'Bird Song Symphony', artist: 'Forest Echoes', url: '' }
-    ]
-  },
-  'morning': {
-    name: 'Coffee & Energy',
-    songs: [
-      { id: 4, title: 'Fresh Start', artist: 'Positive Vibes', url: '' },
-      { id: 5, title: 'Morning Motivation', artist: 'Upbeat Collective', url: '' },
-      { id: 6, title: 'New Day Rising', artist: 'Energy Boost', url: '' }
-    ]
-  },
-  'afternoon': {
-    name: 'Afternoon Flow',
-    songs: [
-      { id: 7, title: 'Focus Mode', artist: 'Productivity Mix', url: '' },
-      { id: 8, title: 'Steady Rhythm', artist: 'Work Beats', url: '' },
-      { id: 9, title: 'Creative Energy', artist: 'Flow State', url: '' }
-    ]
-  },
-  'evening': {
-    name: 'Golden Hour',
-    songs: [
-      { id: 10, title: 'Sunset Dreams', artist: 'Chill Collective', url: '' },
-      { id: 11, title: 'Evening Breeze', artist: 'Relaxed Vibes', url: '' },
-      { id: 12, title: 'Twilight Glow', artist: 'Ambient Hour', url: '' }
-    ]
-  },
-  'night': {
-    name: 'Night Vibes',
-    songs: [
-      { id: 13, title: 'City Lights', artist: 'Urban Nights', url: '' },
-      { id: 14, title: 'Midnight Groove', artist: 'Night Owls', url: '' },
-      { id: 15, title: 'Starlit Sky', artist: 'Evening Jazz', url: '' }
-    ]
-  },
-  'late-night': {
-    name: 'Deep Sleep',
-    songs: [
-      { id: 16, title: 'Peaceful Slumber', artist: 'Sleep Sounds', url: '' },
-      { id: 17, title: 'Night Rain', artist: 'Calm Waters', url: '' },
-      { id: 18, title: 'Dream State', artist: 'Soft Melodies', url: '' }
-    ]
-  }
-}
-
 const SalilMusicPlayer = () => {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [isPlaying, setIsPlaying] = useState(false)
@@ -73,6 +22,7 @@ const SalilMusicPlayer = () => {
   const [volume, setVolume] = useState([75])
   const [currentPlaylist, setCurrentPlaylist] = useState(null)
   const [selectedTimeBlock, setSelectedTimeBlock] = useState(null)
+  const audioRef = useRef(null)
 
   // Get current time block based on hour
   const getCurrentTimeBlock = (time = new Date()) => {
@@ -97,25 +47,72 @@ const SalilMusicPlayer = () => {
     return () => clearInterval(timer)
   }, [])
 
-  // Update playlist when time block changes
+  // Fetch the current playlist based on time
   useEffect(() => {
-    const activeBlock = getCurrentTimeBlock(currentTime)
-    if (!selectedTimeBlock) {
-      setCurrentPlaylist(samplePlaylists[activeBlock.id])
+    const fetchCurrentPlaylist = async () => {
+      try {
+        const response = await fetch('/api/current-playlist')
+        const data = await response.json()
+        if (!selectedTimeBlock && data && data.playlist && data.songs) {
+          setCurrentPlaylist({ name: data.playlist.name, songs: data.songs })
+          setCurrentSong(0)
+        }
+      } catch (error) {
+        console.error('Failed to fetch current playlist:', error)
+      }
     }
+
+    fetchCurrentPlaylist()
   }, [currentTime, selectedTimeBlock])
 
-  // Initialize with current time block
+  // Update playlist when time block changes (if structure had block keys)
+  useEffect(() => {
+    const activeBlock = getCurrentTimeBlock(currentTime)
+    if (
+      !selectedTimeBlock &&
+      currentPlaylist &&
+      typeof currentPlaylist === 'object' &&
+      currentPlaylist[activeBlock.id]
+    ) {
+      setCurrentPlaylist(currentPlaylist[activeBlock.id])
+    }
+  }, [currentTime, selectedTimeBlock, currentPlaylist])
+
+  // Initialize with current time block if currentPlaylist is a map (safety no-op for API shape)
   useEffect(() => {
     const activeBlock = getCurrentTimeBlock()
-    setCurrentPlaylist(samplePlaylists[activeBlock.id])
-  }, [])
+    if (currentPlaylist && typeof currentPlaylist === 'object' && currentPlaylist[activeBlock.id]) {
+      setCurrentPlaylist(currentPlaylist[activeBlock.id])
+    }
+  }, [currentPlaylist])
+
+  // This effect handles playing/pausing when the isPlaying state changes
+  useEffect(() => {
+    if (!audioRef.current) return
+    if (isPlaying) {
+      audioRef.current
+        .play()
+        .catch(error => console.error('Error playing audio:', error))
+    } else {
+      audioRef.current.pause()
+    }
+  }, [isPlaying])
+
+  // This effect handles song changes
+  useEffect(() => {
+    if (!audioRef.current) return
+    if (isPlaying && currentPlaylist) {
+      audioRef.current
+        .play()
+        .catch(error => console.error('Error playing audio:', error))
+    }
+  }, [currentSong, currentPlaylist, isPlaying])
 
   const formatTime = (date) => {
-    return date.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
       minute: '2-digit',
-      hour12: true 
+      hour12: true,
     })
   }
 
@@ -123,26 +120,47 @@ const SalilMusicPlayer = () => {
     return selectedTimeBlock || getCurrentTimeBlock(currentTime)
   }
 
-  const selectTimeBlock = (block) => {
+  // UPDATED: selectTimeBlock to fetch playlist by time_block
+  const selectTimeBlock = async (block) => {
     setSelectedTimeBlock(block)
-    setCurrentPlaylist(samplePlaylists[block.id])
-    setCurrentSong(0)
-    setIsPlaying(false)
+    try {
+      const playlistsRes = await fetch('/api/playlists')
+      const playlists = await playlistsRes.json()
+      const match = Array.isArray(playlists)
+        ? playlists.find(p => p.time_block === block.id)
+        : null
+      if (match) {
+        const songsRes = await fetch(`/api/playlist/${match.id}/songs`)
+        const songs = await songsRes.json()
+        setCurrentPlaylist({ name: match.name, songs })
+      }
+      setCurrentSong(0)
+      setIsPlaying(false)
+    } catch (error) {
+      console.error(`Failed to fetch playlist for ${block.name}:`, error)
+    }
   }
 
   const resetToCurrentTime = () => {
     setSelectedTimeBlock(null)
     const activeBlock = getCurrentTimeBlock(currentTime)
-    setCurrentPlaylist(samplePlaylists[activeBlock.id])
+    if (currentPlaylist && typeof currentPlaylist === 'object' && currentPlaylist[activeBlock.id]) {
+      setCurrentPlaylist(currentPlaylist[activeBlock.id])
+    }
     setCurrentSong(0)
   }
 
   const togglePlayPause = () => {
+    if (isPlaying) {
+      audioRef.current?.pause()
+    } else {
+      audioRef.current?.play()
+    }
     setIsPlaying(!isPlaying)
   }
 
   const nextSong = () => {
-    if (currentPlaylist && currentSong < currentPlaylist.songs.length - 1) {
+    if (currentPlaylist?.songs && currentSong < currentPlaylist.songs.length - 1) {
       setCurrentSong(currentSong + 1)
     } else {
       setCurrentSong(0)
@@ -152,7 +170,7 @@ const SalilMusicPlayer = () => {
   const prevSong = () => {
     if (currentSong > 0) {
       setCurrentSong(currentSong - 1)
-    } else if (currentPlaylist) {
+    } else if (currentPlaylist?.songs) {
       setCurrentSong(currentPlaylist.songs.length - 1)
     }
   }
@@ -162,23 +180,23 @@ const SalilMusicPlayer = () => {
     const centerY = 300
     const radius = 200
     const segmentAngle = 360 / timeBlocks.length
-    
+
     return timeBlocks.map((block, index) => {
       const startAngle = (index * segmentAngle - 90) * (Math.PI / 180)
       const endAngle = ((index + 1) * segmentAngle - 90) * (Math.PI / 180)
-      
+
       const x1 = centerX + radius * Math.cos(startAngle)
       const y1 = centerY + radius * Math.sin(startAngle)
       const x2 = centerX + radius * Math.cos(endAngle)
       const y2 = centerY + radius * Math.sin(endAngle)
-      
+
       const largeArcFlag = segmentAngle > 180 ? 1 : 0
-      
+
       return {
         ...block,
         path: `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`,
         textX: centerX + (radius * 0.7) * Math.cos((startAngle + endAngle) / 2),
-        textY: centerY + (radius * 0.7) * Math.sin((startAngle + endAngle) / 2)
+        textY: centerY + (radius * 0.7) * Math.sin((startAngle + endAngle) / 2),
       }
     })
   }
@@ -188,6 +206,11 @@ const SalilMusicPlayer = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-300 via-pink-300 to-purple-400 flex flex-col items-center justify-center p-4">
+      <audio
+        ref={audioRef}
+        src={currentPlaylist?.songs?.[currentSong]?.url || ''}
+        onEnded={nextSong}
+      />
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 tracking-wide">
@@ -205,13 +228,13 @@ const SalilMusicPlayer = () => {
           <defs>
             <filter id="glow">
               <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-              <feMerge> 
+              <feMerge>
                 <feMergeNode in="coloredBlur"/>
                 <feMergeNode in="SourceGraphic"/>
               </feMerge>
             </filter>
           </defs>
-          
+
           {/* Time segments */}
           {dialSegments.map((segment, index) => {
             const isActive = segment.id === activeBlock.id
@@ -246,7 +269,7 @@ const SalilMusicPlayer = () => {
               </g>
             )
           })}
-          
+
           {/* Center play button */}
           <circle
             cx="300"
@@ -256,7 +279,7 @@ const SalilMusicPlayer = () => {
             className="cursor-pointer hover:fill-white transition-all duration-300 filter drop-shadow-lg"
             onClick={togglePlayPause}
           />
-          
+
           {/* Play/Pause icon */}
           {isPlaying ? (
             <rect
@@ -292,7 +315,7 @@ const SalilMusicPlayer = () => {
         <Card className="bg-white/10 backdrop-blur-md border-white/20 text-white p-6 mb-6 max-w-md w-full">
           <div className="text-center">
             <h3 className="text-xl font-semibold mb-2">{currentPlaylist.name}</h3>
-            {currentPlaylist.songs[currentSong] && (
+            {currentPlaylist?.songs?.[currentSong] && (
               <div className="space-y-1">
                 <div className="font-medium">{currentPlaylist.songs[currentSong].title}</div>
                 <div className="text-sm opacity-80">by {currentPlaylist.songs[currentSong].artist}</div>
@@ -313,7 +336,7 @@ const SalilMusicPlayer = () => {
           >
             <SkipBack size={20} />
           </Button>
-          
+
           <Button
             variant="ghost"
             size="lg"
@@ -322,7 +345,7 @@ const SalilMusicPlayer = () => {
           >
             {isPlaying ? <Pause size={24} /> : <Play size={24} />}
           </Button>
-          
+
           <Button
             variant="ghost"
             size="sm"
@@ -366,13 +389,11 @@ const SalilMusicPlayer = () => {
         <Card className="bg-white/10 backdrop-blur-md border-white/20 text-white p-4 mt-4 max-w-md w-full">
           <h4 className="font-medium mb-3 text-center">Playlist</h4>
           <div className="space-y-2 max-h-40 overflow-y-auto">
-            {currentPlaylist.songs.map((song, index) => (
+            {currentPlaylist?.songs?.map((song, index) => (
               <div
                 key={song.id}
                 className={`flex items-center justify-between p-2 rounded cursor-pointer transition-colors ${
-                  index === currentSong 
-                    ? 'bg-white/20' 
-                    : 'hover:bg-white/10'
+                  index === currentSong ? 'bg-white/20' : 'hover:bg-white/10'
                 }`}
                 onClick={() => setCurrentSong(index)}
               >
