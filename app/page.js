@@ -19,7 +19,7 @@ const SalilMusicPlayer = () => {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentSong, setCurrentSong] = useState(0)
-  const [volume, setVolume] = useState([75])
+  const [volume, setVolume] = useState(75)
   const [currentPlaylist, setCurrentPlaylist] = useState(null)
   const [selectedTimeBlock, setSelectedTimeBlock] = useState(null)
   const audioRef = useRef(null)
@@ -108,17 +108,12 @@ const SalilMusicPlayer = () => {
     }
   }, [currentSong, currentPlaylist, isPlaying])
 
-  const formatTime = (date) => {
-    return date.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    })
-  }
-
-  const getActiveTimeBlock = () => {
-    return selectedTimeBlock || getCurrentTimeBlock(currentTime)
-  }
+  // This effect handles volume changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume / 100
+    }
+  }, [volume])
 
   // UPDATED: selectTimeBlock to fetch playlist by time_block
   const selectTimeBlock = async (block) => {
@@ -143,11 +138,8 @@ const SalilMusicPlayer = () => {
 
   const resetToCurrentTime = () => {
     setSelectedTimeBlock(null)
-    const activeBlock = getCurrentTimeBlock(currentTime)
-    if (currentPlaylist && typeof currentPlaylist === 'object' && currentPlaylist[activeBlock.id]) {
-      setCurrentPlaylist(currentPlaylist[activeBlock.id])
-    }
     setCurrentSong(0)
+    // The fetchCurrentPlaylist useEffect will automatically fetch the current playlist
   }
 
   const togglePlayPause = () => {
@@ -360,13 +352,13 @@ const SalilMusicPlayer = () => {
         <div className="flex items-center space-x-2">
           <Volume2 size={16} />
           <Slider
-            value={volume}
-            onValueChange={setVolume}
+            value={[volume]}
+            onValueChange={(value) => setVolume(value[0])}
             max={100}
             step={1}
             className="flex-1"
           />
-          <span className="text-sm w-8">{volume[0]}</span>
+          <span className="text-sm w-8">{volume}</span>
         </div>
 
         {/* Reset to current time button */}

@@ -94,18 +94,18 @@ const sampleSongs = [
   
   // Morning songs
   { id: uuidv4(), playlist_id: null, title: 'Fresh Start', artist: 'Positive Vibes', url: '/music/03.mp3', time_block: 'morning' },
-  { id: uuidv4(), playlist_id: null, title: 'Morning Motivation', artist: 'Upbeat Collective', url: '/music/03.mp3', time_block: 'morning' },
-  { id: uuidv4(), playlist_id: null, title: 'New Day Rising', artist: 'Energy Boost', url: '/music/03.mp3', time_block: 'morning' },
+  { id: uuidv4(), playlist_id: null, title: 'Morning Motivation', artist: 'Upbeat Collective', url: '/music/05.mp3', time_block: 'morning' },
+  { id: uuidv4(), playlist_id: null, title: 'New Day Rising', artist: 'Energy Boost', url: '/music/06.mp3', time_block: 'morning' },
   
   // Afternoon songs
   { id: uuidv4(), playlist_id: null, title: 'Focus Mode', artist: 'Productivity Mix', url: '/music/03.mp3', time_block: 'afternoon' },
-  { id: uuidv4(), playlist_id: null, title: 'Steady Rhythm', artist: 'Work Beats', url: '/music/03.mp3', time_block: 'afternoon' },
-  { id: uuidv4(), playlist_id: null, title: 'Creative Energy', artist: 'Flow State', url: '/music/03.mp3', time_block: 'afternoon' },
+  { id: uuidv4(), playlist_id: null, title: 'Steady Rhythm', artist: 'Work Beats', url: '/music/05.mp3', time_block: 'afternoon' },
+  { id: uuidv4(), playlist_id: null, title: 'Creative Energy', artist: 'Flow State', url: '/music/06.mp3', time_block: 'afternoon' },
   
   // Evening songs
-  { id: uuidv4(), playlist_id: null, title: 'Sunset Dreams', artist: 'Chill Collective', url: '/music/03.mp3', time_block: 'evening' },
-  { id: uuidv4(), playlist_id: null, title: 'Evening Breeze', artist: 'Relaxed Vibes', url: '/music/03.mp3', time_block: 'evening' },
-  { id: uuidv4(), playlist_id: null, title: 'Twilight Glow', artist: 'Ambient Hour', url: '/music/03.mp3', time_block: 'evening' },
+  { id: uuidv4(), playlist_id: null, title: 'Sunset Dreams', artist: 'Chill Collective', url: '/music/07.mp3', time_block: 'evening' },
+  { id: uuidv4(), playlist_id: null, title: 'Evening Breeze', artist: 'Relaxed Vibes', url: '/music/08.mp3', time_block: 'evening' },
+  { id: uuidv4(), playlist_id: null, title: 'Twilight Glow', artist: 'Ambient Hour', url: '/music/09.mp3', time_block: 'evening' },
   
   // Night songs
   { id: uuidv4(), playlist_id: null, title: 'City Lights', artist: 'Urban Nights', url: '/music/07.mp3', time_block: 'night' },
@@ -114,8 +114,8 @@ const sampleSongs = [
   
   // Late Night songs
   { id: uuidv4(), playlist_id: null, title: 'Peaceful Slumber', artist: 'Sleep Sounds', url: '/music/03.mp3', time_block: 'late-night' },
-  { id: uuidv4(), playlist_id: null, title: 'Night Rain', artist: 'Calm Waters', url: '/music/03.mp3', time_block: 'late-night' },
-  { id: uuidv4(), playlist_id: null, title: 'Dream State', artist: 'Soft Melodies', url: '/music/03.mp3', time_block: 'late-night' }
+  { id: uuidv4(), playlist_id: null, title: 'Night Rain', artist: 'Calm Waters', url: '/music/05.mp3', time_block: 'late-night' },
+  { id: uuidv4(), playlist_id: null, title: 'Dream State', artist: 'Soft Melodies', url: '/music/06.mp3', time_block: 'late-night' }
 ]
 
 // Initialize database with sample data
@@ -123,28 +123,27 @@ async function initializeDatabase() {
   try {
     const db = await connectToMongo()
     
-    // Check if data already exists
-    const existingPlaylists = await db.collection('playlists').countDocuments()
+    // Clear existing data and reinitialize
+    await db.collection('playlists').deleteMany({})
+    await db.collection('songs').deleteMany({})
     
-    if (existingPlaylists === 0) {
-      // Insert sample playlists
-      await db.collection('playlists').insertMany(samplePlaylists)
-      
-      // Update songs with playlist IDs and insert them
-      const insertedPlaylists = await db.collection('playlists').find().toArray()
-      
-      const songsWithPlaylistIds = sampleSongs.map(song => {
-        const matchingPlaylist = insertedPlaylists.find(p => p.time_block === song.time_block)
-        return {
-          ...song,
-          playlist_id: matchingPlaylist ? matchingPlaylist.id : null
-        }
-      })
-      
-      await db.collection('songs').insertMany(songsWithPlaylistIds)
-      
-      console.log('Database initialized with sample data')
-    }
+    // Insert sample playlists
+    await db.collection('playlists').insertMany(samplePlaylists)
+    
+    // Update songs with playlist IDs and insert them
+    const insertedPlaylists = await db.collection('playlists').find().toArray()
+    
+    const songsWithPlaylistIds = sampleSongs.map(song => {
+      const matchingPlaylist = insertedPlaylists.find(p => p.time_block === song.time_block)
+      return {
+        ...song,
+        playlist_id: matchingPlaylist ? matchingPlaylist.id : null
+      }
+    })
+    
+    await db.collection('songs').insertMany(songsWithPlaylistIds)
+    
+    console.log('Database initialized with sample data')
   } catch (error) {
     console.error('Database initialization error:', error)
   }
@@ -218,6 +217,7 @@ async function handleRoute(request, { params }) {
 
       const cleanedSongs = songs.map(({ _id, ...rest }) => rest)
 
+      // Return the playlist with songs in the format expected by frontend
       return handleCORS(NextResponse.json({
         playlist: { ...playlist, _id: undefined },
         songs: cleanedSongs,
