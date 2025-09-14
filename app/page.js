@@ -193,6 +193,18 @@ const SalilMusicPlayer = () => {
     })
   }
 
+  const formatTime = (date) => {
+    return date.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true 
+    })
+  }
+
+  const getActiveTimeBlock = () => {
+    return selectedTimeBlock || getCurrentTimeBlock(currentTime)
+  }
+
   const activeBlock = getActiveTimeBlock()
   const dialSegments = createTimeDialPath()
 
